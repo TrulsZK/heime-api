@@ -1,20 +1,16 @@
 import requests
-import csv
+import json
 
 # Settings
 headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"}
-csvfilepath = "heime_token.csv"
+jsonfilepath = "heime_token.json"
 refresh_token = ""
-client_secret = "XXXXXX"
+client_secret = "xxxxxxxxxxxx"
 
-# Find token in CSV File
-with open(csvfilepath, "r") as csvfile:
-    csvreader = csv.reader(csvfile)
-    header = next(csvreader)
-    value_index = header.index('value')
-    for row in csvreader:
-        if row[0] == 'refresh_token':
-            refresh_token = row[value_index]
+# Find token in JSON File
+with open(jsonfilepath, "r") as jsonfile:
+    token_data = json.load(jsonfile)
+    refresh_token = token_data.get("refresh_token")
 
 # Start Session
 session = requests.Session()
@@ -38,13 +34,7 @@ login_expires_in = loginrefresh_response.json()["expires_in"]
 login_access_token = loginrefresh_response.json()["access_token"]
 login_refresh_token = loginrefresh_response.json()["refresh_token"]
 
-# Write to CSV
-with open(csvfilepath, "w") as csvfile:
-    csvwriter = csv.writer(csvfile)
-    csvwriter.writerow(["key", "value"])
-    csvwriter.writerow(["token_type", login_token_type])
-    csvwriter.writerow(["expires_in", login_expires_in])
-    csvwriter.writerow(["access_token", login_access_token])
-    csvwriter.writerow(["refresh_token", login_refresh_token])
-    print("CSV Updated")
-
+# Write to JSON
+with open(jsonfilepath, "w") as jsonfile:
+    json.dump(loginrefresh_response.json(), jsonfile, indent=4)
+    print("JSON Updated")

@@ -1,19 +1,15 @@
 import requests
-import csv
+import json
 
 # Settings
 headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"}
-csvfilepath = "heime_token.csv"
+jsonfilepath = "heime_token.json"
 access_token = ""
 
-# Find token in CSV File
-with open(csvfilepath, "r") as csvfile:
-    csvreader = csv.reader(csvfile)
-    header = next(csvreader)
-    value_index = header.index('value')
-    for row in csvreader:
-        if row[0] == 'access_token':
-            access_token = row[value_index]
+# Find token in JSON File
+with open(jsonfilepath, "r") as jsonfile:
+    token_data = json.load(jsonfile)
+    access_token = token_data.get("access_token")
 
 # Start Session
 session = requests.Session()
