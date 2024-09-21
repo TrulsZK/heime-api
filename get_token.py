@@ -1,12 +1,12 @@
 import requests
-import csv
+import json
 
 # Settings
 headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"}
-loginmobilenumber = 00000000
+loginmobilenumber = "+4700000000"
 loginpin = 0000
-csvfilepath = "heime_token.csv"
-client_secret = "XXXXXX"
+jsonfilepath = "heime_token.json"
+client_secret = "xxxxxxxxxxxx"
 
 # Start Session
 session = requests.Session()
@@ -14,13 +14,20 @@ session = requests.Session()
 start_url = "https://app.heime.com/"
 start_payload = {}
 
-start_response = session.post(start_url, json=start_payload, headers=headers)
+start_response = session.get(start_url, json=start_payload, headers=headers)
+
+xsrf_token = session.cookies.get("XSRF-TOKEN")
 
 # Enter Mobile phone number
 loginmobilenumber_url = "https://app.heime.com/en/api/v1/check"
-loginmobilenumber_payload = {"phone": str(loginmobilenumber)}
+loginmobilenumber_headers = {
+    "accept": "application/json",
+    "X-XSRF-TOKEN": str(xsrf_token),
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+}
+loginmobilenumber_payload = {"phone": loginmobilenumber}
 
-loginmobilenumber_response = session.post(loginmobilenumber_url, json=loginmobilenumber_payload, headers=headers)
+loginmobilenumber_response = session.post(loginmobilenumber_url, json=loginmobilenumber_payload, headers=loginmobilenumber_headers)
 
 print(loginmobilenumber_response.json())
 
@@ -35,19 +42,7 @@ loginpin_response = session.post(loginpin_url, json=loginpin_payload, headers=he
 
 print(loginpin_response.json())
 
-# Set tokens as var
-login_token_type = loginpin_response.json()["token_type"]
-login_expires_in = loginpin_response.json()["expires_in"]
-login_access_token = loginpin_response.json()["access_token"]
-login_refresh_token = loginpin_response.json()["refresh_token"]
-
-# Write to CSV
-with open(csvfilepath, "w") as csvfile:
-    csvwriter = csv.writer(csvfile)
-    csvwriter.writerow(["key", "value"])
-    csvwriter.writerow(["token_type", login_token_type])
-    csvwriter.writerow(["expires_in", login_expires_in])
-    csvwriter.writerow(["access_token", login_access_token])
-    csvwriter.writerow(["refresh_token", login_refresh_token])
-    print("CSV Updated")
-
+# Write to JSON
+with open(jsonfilepath, "w") as jsonfile:
+    json.dump(loginpin_response.json(), jsonfile, indent=4)
+    print("JSON Updated")
